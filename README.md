@@ -59,7 +59,12 @@ JMM禁止编译器把final域的写重排序到构造函数之外:final变量，
 双重检测锁 1创建内存空间、2对象初始化、3设置对象指向内存空间（本意是先初始化后指向），但是2，3有可能重排序，先指向，此时还为初始化，为null，可用volatile声明，禁止重排序。
 this溢出：要先构造完成，再赋值给其他引用。否则对象还没构造完成，就赋值了，就造成逃逸。
 
-##### 2.6 
+##### 2.6 as if serial && happens-before
 as if serial语义，对单线程会有重排序控制，对多线程不会，跟happens-before一样
+
+##### 2.7 锁
+
+threadLocalMap 实际上就是一个以 threadLocal 实例为 key，任意对象为 value 的 Entry 数组
+
 
 
