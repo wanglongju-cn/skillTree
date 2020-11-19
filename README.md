@@ -1,6 +1,10 @@
 # 技能树
 ### 集合
 集合.1-[collection接口(list set queue)](https://www.cnblogs.com/nayitian/p/3266090.html)
+LinkedList: 双向链表 Node节点：value ,previous,next。维护了一个first,last指针。add():直接add last, add（index i ,E e):看i位于那个半区，然后从fisrt or last开始遍历。
+ArrayList:数组，满了才扩容，扩容1.5倍，Arrays.copyOf
+“==” 基本数据类型的话，比较的是值，基本数据类型是在虚拟机栈里存储，自定义数据类型的话，比较的是是否指向同一个地址的引用，String存在字符串常量池中。
+equals，基本数据类型不能equals ，Object 类是== ，String比较的是字符串内容，其他类型最好重写。
 
 集合.2-[concurrent包集合](https://www.cnblogs.com/nayitian/p/3319040.html)
 
@@ -138,7 +142,7 @@ JVM:
 Java虚拟机所管理的内存包括
 1、程序计数器：线程私有，记录执行的字节码文件的行数。线程切换、循环、跳转、异常处理都会跳走，要记录行号以便下次执行。不会OOM
 2、虚拟机栈：生命周期与方法相同，是执行方法的内存模型。每执行一个方法就会创建一个栈帧，把栈帧压入栈，成功返回或者抛出异常之后，栈帧就会出栈。会SOE(stackOverflowError)和OOM(outOfMemory)
-    栈帧：栈帧存储方法的相关信息，包含局部变量数表、返回值等，操作数栈、动态链接 
+    栈帧：栈帧存储方法的相关信息，包含局部变量数表(八种基本数据类型、对象引用)、返回值等，操作数栈、动态链接 
 3、本地方法栈：native方法，会SOE和OOM
 4、方法区：用于存储已被虚拟机加载的类信息、常量、静态变量、即时编译后的代码等数据，会OOM
 5、堆：对象实例，数组。
@@ -248,12 +252,127 @@ A、类文件的结构检查：检查是否满足Java类文件的固定格式
 1、当一个类加载器收到类加载请求的时候，它首先不会自己去加载这个类的信息，而是把该  
 
 
+mysql:
+
+1. InnoDB 支持事务，MyISAM 不支持事务。这是 MySQL 将默认存储引擎从 MyISAM 变成 InnoDB 的重要原因之一；
+2. InnoDB 支持外键，而 MyISAM 不支持。对一个包含外键的 InnoDB 表转为 MYISAM 会失败； 
+3. InnoDB 是聚集索引，MyISAM 是非聚集索引。聚簇索引的文件存放在主键索引的叶子节点上，因此 InnoDB 必须要有主键，通过主键索引效率很高。但是辅助索引需要两次查询，先查询到主键，然后再通过主键查询到数据。因此，主键不应该过大，因为主键太大，其他索引也都会很大。而 MyISAM 是非聚集索引，数据文件是分离的，索引保存的是数据文件的指针。主键索引和辅助索引是独立的。
+4. InnoDB 不保存表的具体行数，执行 select count(*) from table 时需要全表扫描。而MyISAM 用一个变量保存了整个表的行数，执行上述语句时只需要读出该变量即可，速度很快；    
+5. InnoDB 最小的锁粒度是行锁，MyISAM 最小的锁粒度是表锁。一个更新语句会锁住整张表，导致其他查询和更新都会被阻塞，因此并发访问受限。
+
+一、为什么B+树比B树更适合做索引 
+
+概念：B+树：非叶子节点只存储索引和指向，不存储具体信息，所有的节点信息都在叶子节点上。B树：非叶子节点也保存节点信息。
+1、磁盘IO读写次数相比B树降低了，一次IO读更多的索引数据
+  在B+树中，其非叶子的内部节点都变成了key值，因此其内部节点相对B 树更小。如果把所有同一内部节点的key存放在同一盘块中，那么盘块所能容纳的key数量也越多。一次性读内存中的需要查找的key值也就越多。相对来说IO读写次数也就降低了。
+2、每次查询的时间复杂度是稳定的，稳定很重要
+  在B+树中，由于分支节点只是叶子节点的索引，所以对于任意关键字的查找都必须从根节点走到分支节点，所有关键字查询路径长度相同，每次查询的时间复杂度是固定的。但是在B树中，其分支节点上也保存有数据，对于每一个数据的查询所走的路径长度是不一样的，所以查询效率也不一样。
+3、遍历效率更高 叶子节点遍历效率高
+  由于B+树的数据都存储在叶子节点上，分支节点均为索引，方便扫库，只需扫一遍叶子即可。但是B树在分支节点上都保存着数据，要找到具体的顺序数据，需要执行一次中序遍历来查找。所以B+树更加适合范围查询的情况，在解决磁盘IO性能的同时解决了B树元素遍历效率低下的问题。
+
+哈希索引，等于的时候比较有优势
+
+一致性hash:加机器时，重新计算缓存，导致大面积瘫痪。改成环-找下一个，或者虚拟节点。
+
+表分区：
+表分区，是指根据一定规则，将数据库中的一张表分解成多个更小的，容易管理的部分。从逻辑上看，只有一张表，但是底层却是由多个物理分区组成。
+
+RANGE分区： 这种模式允许将数据划分不同范围。例如可以将一个表通过年份划分成若干个分区
+
+LIST分区： 这种模式允许系统通过预定义的列表的值来对数据进行分割。按照List中的值分区，与RANGE的区别是，range分区的区间范围值是连续的。
+
+HASH分区 ：这中模式允许通过对表的一个或多个列的Hash Key进行计算，最后通过这个Hash码不同数值对应的数据区域进行分区。例如可以建立一个对表主键进行分区的表。
+
+KEY分区 ：上面Hash模式的一种延伸，这里的Hash Key是MySQL系统产生的。
+
+MVCC:读快照，为了
+Ta   a = 0   Tb
+a=1          
+            select a // x
+commit
+            select a // y
+            commit
+                          x   y
+read uncommit(脏读)       1   1
+read commit（幻读）        0   1   mvcc读快照每查一次读一次
+repeated read（不可重复读） 0   0   mvcc读快照是在事物开始第一次
+serializable（序列化）     0   0
+
+MyiSAM  表锁
+Innodb  表锁  行锁  
+表锁开销小，加锁快，不会出现死锁，锁粒度大，并发低
+行锁开销大，加锁慢，会出现死锁，锁粒度小，并发低
+页锁介于两者之间
+
+表锁更适用于以查询为主，只有少量按索引条件更新数据的应用；
+行锁更适用于有大量按索引条件并发更新少量不同数据，同时又有并发查询的应用。
+
+https://blog.csdn.net/mysteryhaohao/article/details/51669741
+
+MyISAM在执行查询语句（SELECT）前，会自动给涉及的所有表加读锁，在执行更新操作（UPDATE、DELETE、INSERT等）前，会自动给涉及的表加写锁。
+对MyISAM表的读操作，不会阻塞其他用户对同一表的读请求，但会阻塞对同一表的写请求；对 MyISAM表的写操作，则会阻塞其他用户对同一表的读和写操作
+session1 select tableA ,session2 也可以select ,但是不能写
+session1 update insert delete tableA,session2即不能读，也不能写
+
+LOCK TABLES给表显式加表锁时，必须同时取得所有涉及到表的锁。比如lock tableA之后，不能查没有加锁的tableB
+
+InnoDb ：
+行锁：只有通过索引条件检索数据，InnoDB才使用行级锁，否则，InnoDB将使用表锁！
+LOCK IN SHARE MODE 共享锁 session1 加锁，session1也可以加，俩锁上去之后都不能更新
+for update 排他锁 session1 加锁，session1不能加
+
+行锁是针对索引加的锁，不是针对记录加的锁，所以虽然是访问不同行的记录，但是如果是使用相同的索引键，是会出现锁冲突的
+间隙锁，条件不存在也能加锁，id=101 不存在，session1 select 1d=101 for update ,session2 select 1d=101 for update 阻塞。
+
+什么时候使用表锁
+对于InnoDB表，在绝大部分情况下都应该使用行级锁，因为事务和行锁往往是我们之所以选择InnoDB表的理由。但在个别特殊事务中，也可以考虑使用表级锁。
+第一种情况是：事务需要更新大部分或全部数据，表又比较大，如果使用默认的行锁，不仅这个事务执行效率低，而且可能造成其他事务长时间锁等待和锁冲突，这种情况下可以考虑使用表锁来提高该事务的执行速度。
+第二种情况是：事务涉及多个表，比较复杂，很可能引起死锁，造成大量事务回滚。这种情况也可以考虑一次性锁定事务涉及的表，从而避免死锁、减少数据库因事务回滚带来的开销。
+
+SET AUTOCOMMIT=0;
+LOCK TABLES t1 WRITE, t2 READ, ...;
+[do something with tables t1 and t2 here];
+COMMIT;
+UNLOCK TABLES;
+先commit 再unlock
+
+数据库死锁 1、访问表的顺序不一致导致
+session1        session2
+
+select tablea   select tableb   （2、insert id =2 也会导致）   
+where id = 1    where id = 1
+for update      for update
+
+select tableb
+where id = 1
+for update （insert id =2 也会导致）   
+// 等待
+                select tablea where ID=1 for update //死锁
+
+（3）前面讲过，在REPEATABLE-READ隔离级别下，如果两个线程同时对相同条件记录用SELECT...FOR UPDATE加排他锁，在没有符合该条件记录情况下，两个线程都会加锁成功。程序发现记录尚不存在，就试图插入一条新记录，如果两个线程都这么做，就会出现死锁。这种情况下，将隔离级别改成READ COMMITTED，就可避免问题，如下所示。
+
+分布式配置中心
+cfg4j, disconf，spring cloud config
+
+
+docker
+共享操作系统
+docker build run pull
+NameSpace 控制隔离
+Control groups 限制资源访问
+
+
+
+
+
 
 
 
 
 
 dubbo、 zk、 mysql、 mybaties，spring设计模式、 系统设计、 jvm、限流，熔断，降级
+
+负载均衡算法:权重随机、权重轮训、一致性hash、最小活跃数。
 
 
 
