@@ -75,12 +75,12 @@ threadLocalMap 实际上就是一个以 threadLocal 实例为 key，任意对象
 里氏替换原则：返回实现接口的任意子类都可以满足该方法的要求，且不影响调用方。</br>
 3.2 抽象工厂 模式是为了让创建工厂和一组产品与使用相分离，并可以随时切换到另一个工厂以及另一组产品；</br>
 抽象工厂模式实现的关键点是定义工厂接口和产品接口，但如何实现工厂与产品本身需要留给具体的子类实现，客户端只和抽象工厂与抽象产品打交道。</br>
-3.3 Builder模式是为了创建一个复杂的对象，需要多个步骤完成创建，或者需要多个零件组装的场景，且创建过程中可以灵活调用不同的步骤或组件。</br>
-3.4 原型模式Prototype 是根据一个现有对象实例复制出一个新的实例，复制出的类型和属性与原实例相同。</br>
+3.3 Builder模式是为了创建一个复杂的对象，需要多个步骤完成创建，或者需要多个零件组装的场景，且创建过程中可以灵活调用不同的步骤或组件。比如mybaties的SqlSessionFactoryBuilder</br>
+3.4 原型模式Prototype 是根据一个现有对象实例复制出一个新的实例，复制出的类型和属性与原实例相同。clone </br>
 3.5 适配器adapter 将一个类的接口转换成客户希望的另外一个接口 1、实现目标接口 2、内部持有一个待转换接口的引用 3、在目标接口的实现方法内部，调用待转换接口的方法 callable ->runnable
 3.6 桥接模式bridge 使用桥接模式扩展一种新的品牌和新的核动力引擎，实际应用也非常少，但它提供的设计思想值得借鉴，即不要过度使用继承，而是优先拆分某些部件，使用组合的方式来扩展功能。
 3.7 组合 Composite模式使得叶子对象和容器对象具有一致性
-3.8 Decorator 装饰器模式
+3.8 Decorator 装饰器模式 Java标准库中，InputStream是抽象类，FileInputStream、ServletInputStream、Socket.getInputStream()这些InputStream都是最终数据源
 3.9 Facade 门面，外观，类似于builder
 3.10 享元（Flyweight）如果一个对象实例一经创建就不可变，那么反复创建相同的实例就没有必要，直接向调用方返回一个共享的实例就行，这样即节省内存，又可以减少创建对象的过程，提高运行速度。比如Integer.valueOf()
 3.11 责任链模式（Chain of Responsibility）是一种处理请求的模式，构成处理链路，依次处理，或者随机处理，比如filter
@@ -90,7 +90,7 @@ threadLocalMap 实际上就是一个以 threadLocal 实例为 key，任意对象
 3.15 观察者模式（Observer）又称发布-订阅模式（Publish-Subscribe：Pub/Sub）
 3.16 状态模式（State）经常用在带有状态的对象中，通过改变状态，来切换同一个借口的不同类。
 3.17 策略模式：Strategy 核心思想是在一个计算方法中把容易变化的算法抽出来作为“策略”参数传进去，从而使得新增策略不必修改原有逻辑。
-3.18 模板方法（Template Method）是一个比较简单的模式。它的主要思想是，定义一个操作的一系列步骤，对于某些暂时确定不下来的步骤，就留给子类去实现。
+3.18 模板方法（Template Method）是一个比较简单的模式。它的主要思想是，定义一个操作的一系列步骤，对于某些暂时确定不下来的步骤，就留给子类去实现。 有抽象方法的抽象类就是模版方法
 3.19 访问者模式（Visitor） 访问者模式是为了抽象出作用于一组复杂对象的操作，并且后续可以新增操作而不必对现有的对象结构做任何改动。
 
 #### Redis
@@ -116,7 +116,41 @@ redis 为啥这么快 1、完全基于内存 2、采用单线程 3、Redis中的
 1、redis 
 主从，主节点断，人工升级 
 哨兵 自动升级 写的压力都在主节点 心跳包、选举
-cluster集群
+
+Redis 的 Sentinel 系统用于管理多个 Redis 服务器（instance）， 该系统执行以下三个任务：
+
+.监控（Monitoring）： Sentinel 会不断地检查你的主服务器和从服务器是否运作正常。
+.提醒（Notification）： 当被监控的某个 Redis 服务器出现问题时， Sentinel 可以通过 API 向管理员或者其他应用程序发送通知。
+.自动故障迁移（Automatic failover）： 当一个主服务器不能正常工作时， Sentinel 会开始一次自动故障迁移操作， 它会将失效主服务器的其中一个从服务器升级为新的主服务器， 并让失效主服务器的其他从服务器改为复制新的主服务器； 当客户端试图连接失效的主服务器时， 集群也会向客户端返回新主服务器的地址， 使得集群可以使用新主服务器代替失效服务器。
+
+RDB的缺点:RDB 需要经常fork子进程来保存数据集到硬盘上,当数据集比较大的时候,fork的过程是非常耗时的,可能会导致Redis在一些毫秒级内不能响应客户端的请求.
+RDB的优点:RDB是一个非常紧凑的文件,与AOF相比,在恢复大的数据集的时候，RDB方式会更快一些.
+
+AOF优点：
+1、文件有序地保存了对数据库执行的所有写入操作
+2、AOF重写：Redis 可以在 AOF 文件体积变得过大时，自动地在后台对 AOF 进行重写
+
+缺点：对于相同的数据集来说，AOF 文件的体积通常要大于 RDB 文件的体积。
+    根据所使用的 fsync 策略，AOF 的速度可能会慢于 RDB 
+Note: 因为以上提到的种种原因， 未来我们可能会将 AOF 和 RDB 整合成单个持久化模型。 
+
+Redis 集群的数据分片
+Redis 集群没有使用一致性hash, 而是引入了 哈希槽的概念.
+ 集群的主从复制模型
+Redis 并不能保证数据的强一致性
+Redis集群并不支持处理多个keys的命令,因为这需要在不同的节点间移动数据
+至少得6台redis
+
+分布式锁：
+1. set NX EX 5s 不存在即设置 5s过期
+2.存在的问题有，session1 加锁，5s没处理完，删除了，session2拿到了锁，session1处理完 把session2的锁删除掉了，所以只能删自己的锁
+
+
+
+前面说过， Redis 的 Sentinel 中关于下线（down）有两个不同的概念：
+
+主观下线（Subjectively Down， 简称 SDOWN）指的是单个 Sentinel 实例对服务器做出的下线判断。
+客观下线（Objectively Down， 简称 ODOWN）指的是多个 Sentinel 实例在对同一个服务器做出 SDOWN 判断， 并且通过 SENTINEL is-master-down-by-addr 命令互相交流之后， 得出的服务器下线判断。 （一个 Sentinel 可以通过向另一个 Sentinel 发送 SENTINEL is-master-down-by-addr 命令来询问对方是否认为给定的服务器已下线。）
 
 mongodb:
 https://www.cnblogs.com/angle6-liu/p/10791875.html
@@ -307,6 +341,7 @@ Innodb  表锁  行锁
 表锁更适用于以查询为主，只有少量按索引条件更新数据的应用；
 行锁更适用于有大量按索引条件并发更新少量不同数据，同时又有并发查询的应用。
 
+
 https://blog.csdn.net/mysteryhaohao/article/details/51669741
 
 MyISAM在执行查询语句（SELECT）前，会自动给涉及的所有表加读锁，在执行更新操作（UPDATE、DELETE、INSERT等）前，会自动给涉及的表加写锁。
@@ -350,6 +385,22 @@ for update （insert id =2 也会导致）
                 select tablea where ID=1 for update //死锁
 
 （3）前面讲过，在REPEATABLE-READ隔离级别下，如果两个线程同时对相同条件记录用SELECT...FOR UPDATE加排他锁，在没有符合该条件记录情况下，两个线程都会加锁成功。程序发现记录尚不存在，就试图插入一条新记录，如果两个线程都这么做，就会出现死锁。这种情况下，将隔离级别改成READ COMMITTED，就可避免问题，如下所示。
+
+SELECT ... FOR UPDATE 走的是IX锁(意向排它锁) sessionA 加了排他锁，sessionB不能加排他锁，但是可以读快照
+SELECT ... LOCK IN SHARE MODE走的是IS锁(意向共享锁)，sessionA 加了共享锁，sessionB 也可以加共享锁，但是无法操作，直到sessionA 完成操作。否则锁等待超时
+间隙锁，左开右闭，为了解决Repeatable read 幻读的问题，小心会造成死锁
+使用普通索引锁定；
+使用多列唯一索引；
+使用唯一索引锁定多行记录。
+
+https://www.jianshu.com/p/32904ee07e56
+
+事务日志包括：重做日志redo 和 回滚日志undo
+redo log（重做日志） 实现持久化和原子性 事务开启之后，先会把 redo log buffer --> os buffer --> redo log file，俗称日志先行，然后buffer pool中的数据文件才会持久化到disk.
+如果此时数据库崩溃了，就可以根据redo log来恢复到崩溃前的一个状态，是选择继续执行还是回滚，取决于恢复策略。
+undo log（回滚日志） 实现一致性 insert 记录一个delete，反之依然，update a->b 记录 b->a ，为了回滚
+日志的种类：错误日志、查询日志、慢查询日志、redo undo日志 二进制日志：记录所有的更改 中继日志：用来跟slave库恢复
+
 
 分布式配置中心
 cfg4j, disconf，spring cloud config
