@@ -401,6 +401,12 @@ redo log（重做日志） 实现持久化和原子性 事务开启之后，先�
 undo log（回滚日志） 实现一致性 insert 记录一个delete，反之依然，update a->b 记录 b->a ，为了回滚
 日志的种类：错误日志、查询日志、慢查询日志、redo undo日志 二进制日志：记录所有的更改 中继日志：用来跟slave库恢复
 
+####
+mybaits
+一级缓存，同一个事务内，同一个session,默认开启。
+
+
+
 
 分布式配置中心
 cfg4j, disconf，spring cloud config
@@ -411,6 +417,19 @@ docker
 docker build run pull
 NameSpace 控制隔离
 Control groups 限制资源访问
+
+
+mybaits:
+执行流程
+https://mmbiz.qpic.cn/mmbiz_png/icu8ekKAcwiaZ3ofMoCfPuefIGE58NEm1mRKQS0ibgGJS3GLEIBsCPowMs6sZS7ibdatIv3ZOdAW48JI2p0LT4y60g/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1
+
+1、
+InputStream inputStream = Resources.getResourceAsStream("mybaits.xml");
+SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
+-->解析mybaits.xml文件，XMLConfigBuilder--> 都加载到 configuration里，比如 db ip，mapper接口
+2、sqlSession.getMapper(UserMapper.class);
+configuration-->MapperRegistry --> Map<Class<?>, MapperProxyFactory<?>> knownMappers, 返回一个 MapperProxy
+3、mapper.select
 
 
 
