@@ -68,7 +68,8 @@ as if serial语义，对单线程会有重排序控制，对多线程不会，�
 
 ##### 2.7 锁
 
-threadLocalMap 实际上就是一个以 threadLocal 实例为 key，任意对象为 value 的 Entry 数组
+threadLocalMap 实际上就是一个以 threadLocal 实例为 key，任意对象为 value 的 Entry 数组。
+1、
 
 #### 3.设计模式
 3.1 工厂模式 调用方尽量持有接口或抽象类，避免持有具体类型的子类，以便工厂方法能随时切换不同的子类返回，却不影响调用方代码。 </br>
@@ -112,6 +113,12 @@ threadLocalMap 实际上就是一个以 threadLocal 实例为 key，任意对象
 redis: 
 数据类型：string，list，set，sorted set，hash
 数据结构：RAW EMBSTR INT HT字典 LINKEDLIST双端链表  ZIPLIST压缩列表  INTSET 整数集合 SKIPLIST跳跃表
+string: INT(如果对象类型可以转换为long) embstr（小于44字节，跟redisObject一起分配内存，总共64字节） raw（超过44字节，跟redisObject分开分配内存）
+list：ziplist(适合数据量小，连续内存，扩容的时候要re allocation,消耗大)， linkedlist（适合数据量大，不连续，扩容的适合只需要memory allocation，碎片多）
+hash:ziplist（k1,v1,k2,v2，连续的）,hashtable（dict-->dictht-->dictEntry）
+set:intSet（都是数字的适合，就是int数组，二分） hashtable
+sorted set :ziplist 和 skiplist和dict的合体。
+
 redis 为啥这么快 1、完全基于内存 2、采用单线程 3、Redis中的数据结构是专门进行设计的，性能最高 4、使用多路I/O复用模型，非阻塞IO
 1、redis 
 主从，主节点断，人工升级 
