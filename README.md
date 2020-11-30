@@ -109,6 +109,8 @@ threadLocalMap 实际上就是一个以 threadLocal 实例为 key，任意对象
 4、热点数据集失效
 为了避免这些热点数据集中的数据同时失效，导致大量访问请求数据库，我们可以在为每个热点数据设置缓存过期时间的时候，让他们的失效时间错开。
 一个挤出时间之上加上或者减去一个范围内的随机值
+5，热Key
+lru算法代理统计，加载到JVM里
 
 redis: 
 数据类型：string，list，set，sorted set，hash
@@ -190,7 +192,7 @@ Java虚拟机所管理的内存包括
 二、线程模型，见volatile
 三、堆的划分
 新生代：young generation minorGC  (Eden - survivor from  -survivor to 8:1:1)  ,JVM无法为一个新的对象分配内存的 Minor GC （Copinng算法）
-老年代：old gen major GC （mark-compact），当eden区内存不足时触发  。
+老年代：old gen major GC （mark-compact），当eden区内存不足时触发。
 Full GC：清理整个堆空间，包括年轻代和老年代
 Perm：jdk1.8中，Perm被替换成MetaSpace，存储类的元数据，也就是方法区。
 https://mmbiz.qpic.cn/mmbiz_png/QCu849YTaIMvwdH7Zz5BtyMBHwLicG82ljTbIQ0EiaDUDDaTtZjicYOnuz2nIt9nVx8t15H0bRZZgZ54Sd4fvFHVg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1
